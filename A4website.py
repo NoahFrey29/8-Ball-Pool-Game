@@ -114,35 +114,35 @@ class MyHandler( BaseHTTPRequestHandler ):
 
 
 
-            sBall1Pos = Physics.Coordinate(675,675)
+            sBall1Pos = Physics.Coordinate(675, 725)
             stillBall1 = Physics.StillBall(1,sBall1Pos)
-            sBall2Pos = Physics.Coordinate(645,625)
+            sBall2Pos = Physics.Coordinate(640,640)
             stillBall2 = Physics.StillBall(2,sBall2Pos)
-            sBall3Pos = Physics.Coordinate(705,624)
+            sBall3Pos = Physics.Coordinate(705,665)
             stillBall3 = Physics.StillBall(3,sBall3Pos)
-            sBall4Pos = Physics.Coordinate(610,580)
+            sBall4Pos = Physics.Coordinate(600,575)
             stillBall4 = Physics.StillBall(4,sBall4Pos)
-            sBall5Pos = Physics.Coordinate(670,575)
+            sBall5Pos = Physics.Coordinate(676, 578)
             stillBall5 = Physics.StillBall(5,sBall5Pos)
-            sBall6Pos = Physics.Coordinate(730,573)
+            sBall6Pos = Physics.Coordinate(740,574)
             stillBall6 = Physics.StillBall(6,sBall6Pos)
-            sBall7Pos = Physics.Coordinate(585,530)
+            sBall7Pos = Physics.Coordinate(550,525)
             stillBall7 = Physics.StillBall(7,sBall7Pos)
-            sBall8Pos = Physics.Coordinate(642,527)
+            sBall8Pos = Physics.Coordinate(630,512)
             stillBall8 = Physics.StillBall(8,sBall8Pos)
-            sBall9Pos = Physics.Coordinate(700, 525)
+            sBall9Pos = Physics.Coordinate(710, 499)
             stillBall9 = Physics.StillBall(9,sBall9Pos)
-            sBall10Pos = Physics.Coordinate(758,520)
+            sBall10Pos = Physics.Coordinate(800,512)
             stillBall10 = Physics.StillBall(10,sBall10Pos)
-            sBall11Pos = Physics.Coordinate(560,475)
+            sBall11Pos = Physics.Coordinate(500,445)
             stillBall11 = Physics.StillBall(11,sBall11Pos)
-            sBall12Pos = Physics.Coordinate(618,472)
+            sBall12Pos = Physics.Coordinate(590,420)
             stillBall12 = Physics.StillBall(12,sBall12Pos)
-            sBall13Pos = Physics.Coordinate(675,470)
+            sBall13Pos = Physics.Coordinate(675,410)
             stillBall13 = Physics.StillBall(13,sBall13Pos)
-            sBall14Pos = Physics.Coordinate(732,470)
+            sBall14Pos = Physics.Coordinate(775,425)
             stillBall14 = Physics.StillBall(14,sBall14Pos)
-            sBall15Pos = Physics.Coordinate(788,472)
+            sBall15Pos = Physics.Coordinate(845,450)
             stillBall15 = Physics.StillBall(15,sBall15Pos)
             sBall0Pos = Physics.Coordinate(676, 2025)
             stillBall0 = Physics.StillBall(0, sBall0Pos)
@@ -184,10 +184,13 @@ class MyHandler( BaseHTTPRequestHandler ):
             game = 0
             numFrames = 0
 
+
             if game == 0:
                 game = Physics.Game( gameName=gameName, player1Name=player1Name, player2Name=player2Name, table=table)
-                numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
-                print("NumFrames:", numFrames)
+                #numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
+                #print("NumFrames:", numFrames)
+            htmlString = ""
+            
 
 
             # computing the acceleration in python
@@ -248,8 +251,6 @@ class MyHandler( BaseHTTPRequestHandler ):
             # #end of string
             # htmlString += "</body></html>"
 
-            htmlString = ""
-
             # writing out with text html content type
             self.send_response(200)
             self.send_header("Content-type", "text/html")
@@ -285,5 +286,4 @@ if __name__ == "__main__":
     httpd = HTTPServer(('localhost', int(sys.argv[1])), MyHandler);
     print("Server listing in port:  ", int(sys.argv[1]));
     #app.run(debug=True)
-    #possibly call the database and set it up here
     httpd.serve_forever();

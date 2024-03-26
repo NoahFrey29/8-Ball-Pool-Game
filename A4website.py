@@ -112,6 +112,61 @@ class MyHandler( BaseHTTPRequestHandler ):
                     file_path = os.path.join(serv_dir, filename)
                     os.remove(file_path) # delete the file
 
+
+
+            sBall1Pos = Physics.Coordinate(675,675)
+            stillBall1 = Physics.StillBall(1,sBall1Pos)
+            sBall2Pos = Physics.Coordinate(645,625)
+            stillBall2 = Physics.StillBall(2,sBall2Pos)
+            sBall3Pos = Physics.Coordinate(705,624)
+            stillBall3 = Physics.StillBall(3,sBall3Pos)
+            sBall4Pos = Physics.Coordinate(610,580)
+            stillBall4 = Physics.StillBall(4,sBall4Pos)
+            sBall5Pos = Physics.Coordinate(670,575)
+            stillBall5 = Physics.StillBall(5,sBall5Pos)
+            sBall6Pos = Physics.Coordinate(730,573)
+            stillBall6 = Physics.StillBall(6,sBall6Pos)
+            sBall7Pos = Physics.Coordinate(585,530)
+            stillBall7 = Physics.StillBall(7,sBall7Pos)
+            sBall8Pos = Physics.Coordinate(642,527)
+            stillBall8 = Physics.StillBall(8,sBall8Pos)
+            sBall9Pos = Physics.Coordinate(700, 525)
+            stillBall9 = Physics.StillBall(9,sBall9Pos)
+            sBall10Pos = Physics.Coordinate(758,520)
+            stillBall10 = Physics.StillBall(10,sBall10Pos)
+            sBall11Pos = Physics.Coordinate(560,475)
+            stillBall11 = Physics.StillBall(11,sBall11Pos)
+            sBall12Pos = Physics.Coordinate(618,472)
+            stillBall12 = Physics.StillBall(12,sBall12Pos)
+            sBall13Pos = Physics.Coordinate(675,470)
+            stillBall13 = Physics.StillBall(13,sBall13Pos)
+            sBall14Pos = Physics.Coordinate(732,470)
+            stillBall14 = Physics.StillBall(14,sBall14Pos)
+            sBall15Pos = Physics.Coordinate(788,472)
+            stillBall15 = Physics.StillBall(15,sBall15Pos)
+            sBall0Pos = Physics.Coordinate(676, 2025)
+            stillBall0 = Physics.StillBall(0, sBall0Pos)
+
+            table = Physics.Table()
+            table += stillBall0
+            table += stillBall1
+            table += stillBall2
+            table += stillBall3
+            table += stillBall4
+            table += stillBall5
+            table += stillBall6
+            table += stillBall7
+            table += stillBall8
+            table += stillBall9
+            table += stillBall10
+            table += stillBall11
+            table += stillBall12
+            table += stillBall13
+            table += stillBall14
+            table += stillBall15
+
+            #print(table)
+
             velocityX = form.getvalue('velocityX')
             velocityY = form.getvalue('velocityY')
             gameName = form.getvalue('gameName');
@@ -120,9 +175,20 @@ class MyHandler( BaseHTTPRequestHandler ):
             # Do something with the received data
             print("Received velX:", velocityX)
             print("Received velY:", velocityY)
+            velX = float(velocityX)
+            velY = float(velocityY)
             print("Received gameName:", gameName)
             print("Received player1Name:", player1Name)
             print("Received player2Name:", player2Name)
+
+            game = 0
+            numFrames = 0
+
+            if game == 0:
+                game = Physics.Game( gameName=gameName, player1Name=player1Name, player2Name=player2Name, table=table)
+                numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
+                print("NumFrames:", numFrames)
+
 
             # computing the acceleration in python
             # stillX = float(form['sb_x'].value)

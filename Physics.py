@@ -680,7 +680,7 @@ class Database():
 ################################################################################
 # something goes into this
 class Game():
-    def __init__( self, gameID=None, gameName=None, player1Name=None, player2Name=None):
+    def __init__( self, gameID=None, gameName=None, player1Name=None, player2Name=None, table=None):
         database = Database(reset=True)
         database.createDB() # reset the database and make a new one
         if gameID is not None and gameName is None and player1Name is None and player2Name is None:
@@ -701,6 +701,8 @@ class Game():
             self.gameName = gameName
             self.player1Name = player1Name
             self.player2Name = player2Name
+
+            #database.writeTable(table)
 
             # call setGame to insert everything into the databases
             database.setGame(gameName, player1Name, player2Name)
@@ -735,6 +737,8 @@ class Game():
         foundCueBall.type = phylib.PHYLIB_ROLLING_BALL
         foundCueBall.obj.rolling_ball.number = 0
 
+        totaltotalFrames = 0;
+
         # get the velocity and the speed
         rVel = Coordinate(xvel, yvel)
         rSpeed = phylib.phylib_length(rVel)
@@ -758,6 +762,8 @@ class Game():
         afterTable = table
         totalTime = 0.0
 
+        tableList = []
+
         # while loop that breaks if the table after segment is None
         while (True):
             afterTable = afterTable.segment()
@@ -766,6 +772,88 @@ class Game():
 
             # call total frames method
             totalFrames = self.calcTotalFrames(beforeTable, afterTable)
+            totaltotalFrames += totalFrames
+            print(totalFrames)
+            for frameNum in range(totalFrames): # loop over total frames
+                rollValue = frameNum*FRAME_INTERVAL # multiply current frame by frame interval
+                newTable = beforeTable.roll(rollValue) # call roll on the state before segment
+                # set the temporary table time to total time + what roll returns
+                newTable.time = totalTime + rollValue
+                tableID = db.writeTable(newTable) # write the table
+                #db.newTableShot(tableID, shotID)
+                cur = db.conn.execute("""INSERT INTO TableShot (TABLEID, SHOTID) 
+                    VALUES (?, ?)""", (tableID+1, shotID)) # insert into TableShot
+                #tableList += newTable
+                
+
+            beforeTable = afterTable # reinstate the before table to the new segment location
+            totalTime = afterTable.time # set time
+
+        # commit and close the connection
+        #db.conn.commit()
+        #cur.close()
+
+        return totaltotalFrames;
+
+
+    def shootWithDB( self, gameName, playerName, table, xvel, yvel ):
+        db = Database(reset=False) # open the database and open the cursor
+        cur = db.conn.cursor()
+
+        # call new shot
+        shotID = db.newShot(playerName)
+
+        # find the cueball
+        foundCueBall = table.findCueBall()
+
+        # initialize position and acceleration
+        xPos = 0
+        yPos = 0
+        xAcc = 0
+        yAcc = 0
+        xPos = foundCueBall.obj.still_ball.pos.x;
+        yPos = foundCueBall.obj.still_ball.pos.y;
+        
+        # change the type and set number to 0
+        foundCueBall.type = phylib.PHYLIB_ROLLING_BALL
+        foundCueBall.obj.rolling_ball.number = 0
+
+        totaltotalFrames = 0;
+
+        # get the velocity and the speed
+        rVel = Coordinate(xvel, yvel)
+        rSpeed = phylib.phylib_length(rVel)
+
+        # recalculate acceleration like in A2
+        if (rSpeed > VEL_EPSILON):
+            xAcc = ((xvel * -1.0) / rSpeed) * DRAG
+            yAcc = ((yvel * -1.0) / rSpeed) * DRAG
+
+        # set all the new values
+        foundCueBall.obj.rolling_ball.pos.x = xPos;
+        foundCueBall.obj.rolling_ball.pos.y = yPos;
+        foundCueBall.obj.rolling_ball.vel.x = xvel;
+        foundCueBall.obj.rolling_ball.vel.y = yvel;
+        
+        foundCueBall.obj.rolling_ball.acc.x = xAcc
+        foundCueBall.obj.rolling_ball.acc.y = yAcc
+    
+        # make a before and after table, and a total time
+        beforeTable = table
+        afterTable = table
+        totalTime = 0.0
+
+        tableList = []
+
+        # while loop that breaks if the table after segment is None
+        while (True):
+            afterTable = afterTable.segment()
+            if afterTable is None:
+                break;
+
+            # call total frames method
+            totalFrames = self.calcTotalFrames(beforeTable, afterTable)
+            totaltotalFrames += totalFrames
             #print(totalFrames)
             for frameNum in range(totalFrames): # loop over total frames
                 rollValue = frameNum*FRAME_INTERVAL # multiply current frame by frame interval
@@ -776,15 +864,23 @@ class Game():
                 #db.newTableShot(tableID, shotID)
                 cur = db.conn.execute("""INSERT INTO TableShot (TABLEID, SHOTID) 
                     VALUES (?, ?)""", (tableID+1, shotID)) # insert into TableShot
+                #tableList += newTable
+                
 
             beforeTable = afterTable # reinstate the before table to the new segment location
             totalTime = afterTable.time # set time
-        
+            tableList += afterTable
+
         # commit and close the connection
         db.conn.commit()
         cur.close()
 
+        return tableList;
+
 
         
+        
+        
+ 
         
         

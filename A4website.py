@@ -108,7 +108,7 @@ class MyHandler( BaseHTTPRequestHandler ):
             #Delete all table-?.svg files
             serv_dir = './'
             for filename in os.listdir(serv_dir):
-                if filename.startswith('table-') and filename.endswith('.svg'):
+                if filename.startswith('table') and filename.endswith('.svg'):
                     file_path = os.path.join(serv_dir, filename)
                     os.remove(file_path) # delete the file
 
@@ -187,8 +187,8 @@ class MyHandler( BaseHTTPRequestHandler ):
 
             if game == 0:
                 game = Physics.Game( gameName=gameName, player1Name=player1Name, player2Name=player2Name, table=table)
-                #numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
-                #print("NumFrames:", numFrames)
+                numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
+                print("NumFrames:", numFrames)
             htmlString = ""
             
 
@@ -229,9 +229,13 @@ class MyHandler( BaseHTTPRequestHandler ):
             #     table = table.segment()
             #     i += 1
 
+            for i in range(1, numFrames):
+                with open(f"table-{i}.svg", "w") as fp:
+                    fp.write(table.svg())
+
             # # making an html string
-            # htmlString = "<html><head><title>Ball Positions and Velocities</title></head><body>"
-            # htmlString += "<h1>Original Ball Positions and Velocities</h1>"
+            htmlString = "<html><head><title>Displaying All the SVGs!!</title></head><body>"
+            htmlString += "<h1>dear god let this work</h1>"
 
             # #add each ball
             # htmlString += "<ul>"
@@ -239,17 +243,17 @@ class MyHandler( BaseHTTPRequestHandler ):
             # htmlString += f"<li>Rolling Ball: Position = ({rollingX}, {rollingY}), Velocity = ({float(form['rb_dx'].value)}, {float(form['rb_dy'].value)}), Number = {int(form['rb_number'].value)}</li>"
             # htmlString += "</ul>"
 
-            # #adding <img> tags for each SVG file
-            # i = 0
-            # while os.path.exists(f"table-{i}.svg"):
-            #     htmlString += f"<img src='table-{i}.svg' alt='Table {i}'><br>"
-            #     i += 1
+            #adding <img> tags for each SVG file
+            i = 0
+            while os.path.exists(f"table-{i}.svg"):
+                htmlString += f"<img src='table-{i}.svg' alt='Table {i}'><br>"
+                i += 1
 
             # #adding a back link
-            # htmlString += '<a href="/shoot.html">Back</a>'
+            htmlString += '<a href="/part1.html.html">Back</a>'
 
             # #end of string
-            # htmlString += "</body></html>"
+            htmlString += "</body></html>"
 
             # writing out with text html content type
             self.send_response(200)

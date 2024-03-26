@@ -702,10 +702,10 @@ class Game():
             self.player1Name = player1Name
             self.player2Name = player2Name
 
-            database.writeTable(table)
+            #database.writeTable(table)
 
             # call setGame to insert everything into the databases
-            #database.setGame(gameName, player1Name, player2Name)
+            database.setGame(gameName, player1Name, player2Name)
         else:
             raise TypeError("""Everything must be set to None except gameID\n
                 OR Only gameID must be set to None""")

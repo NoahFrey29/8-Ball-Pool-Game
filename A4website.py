@@ -52,6 +52,27 @@ class MyHandler( BaseHTTPRequestHandler ):
 
             fp.close();
 
+        elif parsed.path in [ '/display.html' ]:
+
+            # retreive the HTML file
+            fp = open( '.'+self.path );
+            content = fp.read();
+
+            try: # open shoot.html and write data to HTML
+                with open('display.html', 'r') as fp:
+                    content = fp.read()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(bytes(content, 'utf-8'))
+            except FileNotFoundError:
+                # send 404 errors
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes("Error 404!!! File: %s not found\n404" % self.path, "utf-8"))
+
+            fp.close();
+
         # check if the web-pages matches the list
         elif parsed.path.startswith('/table-') and parsed.path.endswith('.svg'): 
             file_path = parsed.path.lstrip("/")
@@ -79,6 +100,23 @@ class MyHandler( BaseHTTPRequestHandler ):
                 self.end_headers()
                 self.wfile.write(bytes("ERROR 404. File: %s not found\n404" % self.path, "utf-8"))
 
+        elif self.path == '/firstTable.svg':
+            file_path = 'firstTable.svg'  # Adjust this path according to the location of your SVG file
+
+            if os.path.exists(file_path):
+                with open(file_path, 'rb') as fp:
+                    content = fp.read()
+                    self.send_response(200)
+                    self.send_header('Content-type', 'image/svg+xml')
+                    self.send_header("Content-length", len(content))
+                    self.end_headers()
+                    self.wfile.write(content)
+            else:
+                # Return 404 if the file does not exist
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes("ERROR 404. File: %s not found\n404" % self.path, "utf-8"))
+
         else:
             # generate 404 for GET requests that aren't the 2 files above
             self.send_response( 404 );
@@ -91,7 +129,7 @@ class MyHandler( BaseHTTPRequestHandler ):
         # parse the URL to get the path and form data
         parsed  = urlparse( self.path );
 
-        if parsed.path in [ '/part1.html' ]:
+        if parsed.path in [ '/display.html' ]:
 
             # get data send as Multipart FormData (MIME format)
             form = cgi.FieldStorage( fp=self.rfile,
@@ -181,11 +219,13 @@ class MyHandler( BaseHTTPRequestHandler ):
             print("Received player1Name:", player1Name)
             print("Received player2Name:", player2Name)
 
+            checkGame = 0
             game = 0
             numFrames = 0
 
 
-            if game == 0:
+            if checkGame == 0:
+                checkGame = 1
                 game = Physics.Game( gameName=gameName, player1Name=player1Name, player2Name=player2Name, table=table)
                 numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
                 print("NumFrames:", numFrames)
@@ -229,8 +269,10 @@ class MyHandler( BaseHTTPRequestHandler ):
             #     table = table.segment()
             #     i += 1
 
-            for i in range(1, numFrames):
+            for i in range(0, numFrames):
                 with open(f"table-{i}.svg", "w") as fp:
+                    table = game.gameRead(table, i)
+                #print(table)
                     fp.write(table.svg())
 
             # # making an html string
@@ -246,14 +288,23 @@ class MyHandler( BaseHTTPRequestHandler ):
             #adding <img> tags for each SVG file
             i = 0
             while os.path.exists(f"table-{i}.svg"):
-                htmlString += f"<img src='table-{i}.svg' alt='Table {i}'><br>"
+                htmlString += f"<img src='table-{i}.svg'><br>"
                 i += 1
 
             # #adding a back link
-            htmlString += '<a href="/part1.html.html">Back</a>'
+            htmlString += '<a href="/part1.html">Back</a>'
 
             # #end of string
             htmlString += "</body></html>"
+
+            print(htmlString)
+            # Define the file path
+            file_path = "display.html"
+
+            # Open the file in write mode
+            with open(file_path, "w") as file:
+                # Write the HTML content to the file
+                file.write(htmlString)
 
             # writing out with text html content type
             self.send_response(200)

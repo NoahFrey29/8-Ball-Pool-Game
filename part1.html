@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A4 Part 1</title>
 <style>
-    svg {
+    object {
         display: block;
         margin: auto;
     }
@@ -20,6 +20,8 @@
 </head>
 <body>
 
+    <!--form action="part1.html" method="post"-->
+
     <div class="container">
         
         <h1>Let's Play Pool!</h1>
@@ -30,11 +32,15 @@
         
         <label for="player2">Player 2 Name:</label>
         <input type="text" id="player2" name="player2"><br><br>
+        <input id="shootButton" type="submit" value="Submit">
 
     </div>
 
+
+
     <div id="lineLength">Line Length: 0</div>
     <div id="cursorPos">Cursor Position: (0, 0)</div>
+    <!--div id="marko">Marko is Cool</div-->
     <svg id="svgContainer" width="700" height="1375" viewBox="-25 -25 1400 2750"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -70,11 +76,25 @@
     </svg>
 
     <script>
-    // Get the SVG container
     var svgContainer = document.getElementById('svgContainer');
 
-    // Get the cue ball element
-    var cueBall = document.querySelector('circle[fill="WHITE"]');
+    // $(document).ready(function() {
+    //     // Load SVG file into the SVG container
+    //     $.get('firstTable.svg', function(data) {
+    //         // Inject SVG content into the SVG container
+    //         svgContainer.innerHTML = new XMLSerializer().serializeToString(data);
+
+    //         // After loading SVG, you can access SVG elements and perform operations
+    //         //var cueBall = svgContainer.querySelector('circle[fill="white"]');
+    //         // Your further operations with the cue ball...
+    //     });
+    // });
+
+    // Get the white ball element
+    var cueBall = svgContainer.querySelector('circle[fill="WHITE"]');
+
+    //var marko = document.getElementById('marko');
+    //marko.innerText = svgContainer.innerHTML;
 
     // Variables to track initial click position
     var initialClickX = 0;
@@ -89,6 +109,7 @@
     var gameElement = document.getElementById("gameName");
     var player1Element = document.getElementById("player1");
     var player2Element = document.getElementById("player2");
+    var button = document.getElementById('shootButton');
     var velocityX = 0;
     var velocityY = 0;
     var accX = 0;
@@ -180,6 +201,21 @@
         }
         var existingLine = document.getElementById('connectingLine');
 
+        if (existingLine) {
+            existingLine.remove();
+            if(turns === 1) {
+                turns = 2;
+            }
+            else if (turns === 2) {
+                turns = 1;
+            }
+        }
+    });
+
+    // Add event listener to the button
+    button.addEventListener('click', function() {
+        // This function will be executed when the button is clicked
+        //alert('Button clicked!');
         var formData = new FormData()
 
         formData.append('velocityX', velocityX.toFixed(2));
@@ -190,22 +226,16 @@
 
         // Make a POST request to the server
         $.ajax({
-            url: 'http://localhost:59138/part1.html',
+            url: 'http://localhost:59138/display.html',
             method: 'POST',
             processData: false,
             contentType: false,
-            data: formData
+            data: formData,
+            success: function(response) {
+            // Redirect to another HTML file
+                window.location.href = 'display.html'; // Change 'another_page.html' to the desired file
+            }
         });
-
-        if (existingLine) {
-            existingLine.remove();
-            if(turns === 1) {
-                turns = 2;
-            }
-            else if (turns === 2) {
-                turns = 1;
-            }
-        }
     });
 
     // Event listener for mouse movement on SVG container

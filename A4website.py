@@ -73,6 +73,27 @@ class MyHandler( BaseHTTPRequestHandler ):
 
             fp.close();
 
+        elif parsed.path in [ '/display.js' ]:
+
+            # retreive the HTML file
+            fp = open( '.'+self.path );
+            content = fp.read();
+
+            try: # open shoot.html and write data to HTML
+                with open('display.js', 'r') as fp:
+                    content = fp.read()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(bytes(content, 'utf-8'))
+            except FileNotFoundError:
+                # send 404 errors
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes("Error 404!!! File: %s not found\n404" % self.path, "utf-8"))
+
+            fp.close();
+
         # check if the web-pages matches the list
         elif parsed.path.startswith('/table-') and parsed.path.endswith('.svg'): 
             file_path = parsed.path.lstrip("/")
@@ -210,6 +231,7 @@ class MyHandler( BaseHTTPRequestHandler ):
             gameName = form.getvalue('gameName');
             player1Name = form.getvalue('player1Name')
             player2Name = form.getvalue('player2Name')
+            counter = form.getvalue('counter')
             # Do something with the received data
             print("Received velX:", velocityX)
             print("Received velY:", velocityY)
@@ -218,93 +240,89 @@ class MyHandler( BaseHTTPRequestHandler ):
             print("Received gameName:", gameName)
             print("Received player1Name:", player1Name)
             print("Received player2Name:", player2Name)
+            print("Received counter:", counter)
+            gamePath = float(counter)
+            print("GamePath:", gamePath)
 
             checkGame = 0
             game = 0
             numFrames = 0
+            htmlString = ""
 
 
-            if checkGame == 0:
+            if gamePath == -1:
+                htmlString = """<html><head><title>Displaying The Winner!</title><head>\n"""
+                htmlString += "<h1>No Winner has been decided yet!</h1>\n"
+                htmlString += '<a href="/part1.html">Continue Playing</a>\n'
+            elif checkGame == 0:
                 checkGame = 1
                 game = Physics.Game( gameName=gameName, player1Name=player1Name, player2Name=player2Name, table=table)
                 numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
                 print("NumFrames:", numFrames)
-            htmlString = ""
-            
+                #while loop similar to A2test2 that writes all svgs to the files and calling segment
+                # i = 0
+                # while table is not None:
+                #     with open(f"table-{i}.svg", "w") as fp:
+                #         fp.write(table.svg())
+                #     table = table.segment()
+                #     i += 1
 
+                for i in range(0, numFrames):
+                    with open(f"table-{i}.svg", "w") as fp:
+                        table = game.gameRead(table, i)
+                    #print(table)
+                        fp.write(table.svg())
 
-            # computing the acceleration in python
-            # stillX = float(form['sb_x'].value)
-            # stillY = float(form['sb_y'].value)
-            # stillPos = Physics.Coordinate(stillX, stillY)
-            # sb = Physics.StillBall(int(form['sb_number'].value), stillPos) # int(form['sb_number'].value)
+                # # making an html string
+                htmlString = """<html><head><title>Displaying All the SVGs!!</title><head>\n"""
+                #htmlString += """<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"> </script>\n"""
+                #htmlString += """<script src="display.js"></script></head><body>\n"""
+                htmlString += "<h1>Animation! (sort of)</h1>\n"
+                htmlString += """<button id="animateButton">Animate!</button>\n"""
 
-            # rollingX = float(form['rb_x'].value)
-            # rollingY = float(form['rb_y'].value)
-            # rollingPos = Physics.Coordinate(rollingX, rollingY)
-            # rollingVelX = float(form['rb_dx'].value)
-            # rollingVelY = float(form['rb_dy'].value)
-            # rollingVel = Physics.Coordinate(float(form['rb_dx'].value), float(form['rb_dy'].value))
-            # rollingAcc = Physics.Coordinate(0.0, 0.0)
-            # rollingSpeed = phylib.phylib_length(rollingVel)
+                # #add each ball
+                # htmlString += "<ul>"
+                # htmlString += f"<li>Still Ball: Position = ({stillX}, {stillY}), Number = {int(form['sb_number'].value)}</li>"
+                # htmlString += f"<li>Rolling Ball: Position = ({rollingX}, {rollingY}), Velocity = ({float(form['rb_dx'].value)}, {float(form['rb_dy'].value)}), Number = {int(form['rb_number'].value)}</li>"
+                # htmlString += "</ul>"
 
-            #manualSpeed = sqrt((rollingVelX*rollingVelX)+(rollingVelY+rollingVelY))
+                #adding <img> tags for each SVG file
+                i = 0
+                while os.path.exists(f"table-{i}.svg"):
+                    htmlString += f"<img src='table-{i}.svg'><br>"
+                    i += 1
+                #htmlString += f"<img id='svg_box' src='table-{0}.svg'><br>\n"
+                #htmlString += """<script>\n
+                #var button = document.getElementById('animateButton');\n
+                #button.addEventListener('click', function() {\n
+                #var i = 1; // Start with SVG number 1\n
+                #$("#svg_box").load( "table-1.svg", alert( 'better?' ) );\n
+                #});\n
+                #</script>\n"""
+                #i += 1
 
-            # rb = Physics.RollingBall(int(form['rb_number'].value), rollingPos, rollingVel, rollingAcc)
+                # #adding a back link
+                htmlString += '<a href="/part1.html">Continue Playing</a>\n'
 
-            # if (rollingSpeed > Physics.VEL_EPSILON):
-            #     rollingAcc.x = ((rollingVel.x * -1.0) / rollingSpeed) * Physics.DRAG
-            #     rollingAcc.y = ((rollingVel.y * -1.0) / rollingSpeed) * Physics.DRAG
+                
 
-            # #create the table and put the balls on the table
-            # table = Physics.Table()
-            # table += sb
-            # table += rb
+                # #end of string
+                htmlString += "</body></html>\n"
 
-            #while loop similar to A2test2 that writes all svgs to the files and calling segment
-            # i = 0
-            # while table is not None:
-            #     with open(f"table-{i}.svg", "w") as fp:
-            #         fp.write(table.svg())
-            #     table = table.segment()
-            #     i += 1
+                #print(htmlString)
+                # Define the file path
+                
+            else:
+                numFrames = game.shoot(gameName, player1Name, table, velX, velY ) 
+                print("NumFrames:", numFrames)
 
-            for i in range(0, numFrames):
-                with open(f"table-{i}.svg", "w") as fp:
-                    table = game.gameRead(table, i)
-                #print(table)
-                    fp.write(table.svg())
-
-            # # making an html string
-            htmlString = "<html><head><title>Displaying All the SVGs!!</title></head><body>"
-            htmlString += "<h1>dear god let this work</h1>"
-
-            # #add each ball
-            # htmlString += "<ul>"
-            # htmlString += f"<li>Still Ball: Position = ({stillX}, {stillY}), Number = {int(form['sb_number'].value)}</li>"
-            # htmlString += f"<li>Rolling Ball: Position = ({rollingX}, {rollingY}), Velocity = ({float(form['rb_dx'].value)}, {float(form['rb_dy'].value)}), Number = {int(form['rb_number'].value)}</li>"
-            # htmlString += "</ul>"
-
-            #adding <img> tags for each SVG file
-            i = 0
-            while os.path.exists(f"table-{i}.svg"):
-                htmlString += f"<img src='table-{i}.svg'><br>"
-                i += 1
-
-            # #adding a back link
-            htmlString += '<a href="/part1.html">Back</a>'
-
-            # #end of string
-            htmlString += "</body></html>"
-
-            print(htmlString)
-            # Define the file path
             file_path = "display.html"
 
             # Open the file in write mode
             with open(file_path, "w") as file:
                 # Write the HTML content to the file
                 file.write(htmlString)
+        
 
             # writing out with text html content type
             self.send_response(200)

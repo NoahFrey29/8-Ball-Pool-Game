@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A4 Part 1</title>
+<title>CIS2750 Final Project!</title>
 <style>
     object {
         display: block;
@@ -15,6 +15,16 @@
     #cursorPos {
         text-align: center;
     }
+    input[type="text"] {
+        margin-right: 10px;
+    }
+    .textContainer { 
+        display: flex; 
+        align-items: center; 
+    }
+    h1 {
+        margin-right: 10px;
+    }
 </style>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -22,25 +32,29 @@
 
     <!--form action="part1.html" method="post"-->
 
-    <div class="container">
+    <div class="textContainer">
         
-        <h1>Let's Play Pool!</h1>
+        <h1>Let's Play Pool!</h1><br>
         <label for="gameName">Game Name:</label>
         <input type="text" id="gameName" name="gameName"><br><br>
         <label for="player1">Player 1 Name:</label>
         <input type="text" id="player1" name="player1"><br><br>
+        <span id="displayText"></span>
         
         <label for="player2">Player 2 Name:</label>
         <input type="text" id="player2" name="player2"><br><br>
-        <input id="shootButton" type="submit" value="Submit">
+        <span id="displayText2"></span>
+        <input id="shootButton" type="submit" value="Shoot!">
+        <input id="winnerButton" type="submit" value="Choose Winner!">
 
     </div>
-
-
+    
 
     <div id="lineLength">Line Length: 0</div>
     <div id="cursorPos">Cursor Position: (0, 0)</div>
     <!--div id="marko">Marko is Cool</div-->
+    <!--svg id="svgContainer" src="firstTable.svg">
+    </svg-->
     <svg id="svgContainer" width="700" height="1375" viewBox="-25 -25 1400 2750"
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -74,6 +88,8 @@
 
     <circle cx="676" cy="2025" r="28" fill="WHITE" />
     </svg>
+    <!--object id="svgContainer" data="firstTable.svg" width="700" height="1375"> </object-->
+    <!--embed src="firstTable.svg" /-->
 
     <script>
     var svgContainer = document.getElementById('svgContainer');
@@ -85,7 +101,7 @@
     //         svgContainer.innerHTML = new XMLSerializer().serializeToString(data);
 
     //         // After loading SVG, you can access SVG elements and perform operations
-    //         //var cueBall = svgContainer.querySelector('circle[fill="white"]');
+    //         var cueBall = svgContainer.querySelector('circle[fill="white"]');
     //         // Your further operations with the cue ball...
     //     });
     // });
@@ -110,14 +126,18 @@
     var player1Element = document.getElementById("player1");
     var player2Element = document.getElementById("player2");
     var button = document.getElementById('shootButton');
+    var winButton = document.getElementById('winnerButton')
+    var displayText = document.getElementById('displayText');
+    var displayText2 = document.getElementById('displayText2');
     var velocityX = 0;
     var velocityY = 0;
     var accX = 0;
     var accY = 0;
+    var counter = 0;
 
     var min = 1;
     var max = 2
-    var random = Math.random() 
+    var random = 0; 
     var turns = Math.floor(random * (max - min) + min); // 1 if player1 (blue), 2 if player2 (red)
 
     var cursorPos;
@@ -170,7 +190,7 @@
 
     // Event listener for mouse down on cue ball
     cueBall.addEventListener('mousedown', function(event) {
-        // Prevent default browser behavior (e.g., text selection)
+        // Prevent default browser behavior
         event.preventDefault();
         // Record initial click position
         initialClickX = event.clientX;
@@ -212,17 +232,39 @@
         }
     });
 
+    player1Element.addEventListener('mousedown', function(event) {
+        random = Math.floor(Math.random() * 2);
+        if (random === 0) {
+            displayText.textContent = "Player 1! (Blue Line, Assigned Low)";
+        }
+        else if (random === 1){
+            displayText.textContent = "Player 2! (Red Line, Assigned High)";
+        }
+        //displayText2.textContent = player2Element.value;
+    });
+    player2Element.addEventListener('mousedown', function(event) {
+        //displayText.textContent = player1Element.value;
+        //random = Math.floor(Math.random() * 2);
+        if (random === 0) {
+            displayText2.textContent = "Player 2! (Red Line, Assigned High)";
+        }
+        else if (random === 1){
+            displayText2.textContent = "Player 1! (Blue Line, Assigned Low)";
+        }
+    });
+
     // Add event listener to the button
     button.addEventListener('click', function() {
-        // This function will be executed when the button is clicked
         //alert('Button clicked!');
-        var formData = new FormData()
+        var formData = new FormData();
+        counter += 1;
 
         formData.append('velocityX', velocityX.toFixed(2));
         formData.append('velocityY', velocityY.toFixed(2));
         formData.append('gameName',  gameElement.value);
         formData.append('player1Name',  player1Element.value);
         formData.append('player2Name',  player2Element.value);
+        formData.append('counter', counter.toFixed(2));
 
         // Make a POST request to the server
         $.ajax({
@@ -233,7 +275,34 @@
             data: formData,
             success: function(response) {
             // Redirect to another HTML file
-                window.location.href = 'display.html'; // Change 'another_page.html' to the desired file
+                window.location.href = 'display.html';
+            }
+        });
+    });
+
+    // Add event listener to the button
+    winButton.addEventListener('click', function() {
+        //alert('Button clicked!');
+        var formData = new FormData();
+        counter = -1;
+
+        formData.append('velocityX', velocityX.toFixed(2));
+        formData.append('velocityY', velocityY.toFixed(2));
+        formData.append('gameName',  gameElement.value);
+        formData.append('player1Name',  player1Element.value);
+        formData.append('player2Name',  player2Element.value);
+        formData.append('counter', counter.toFixed(2));
+
+        // Make a POST request to the server
+        $.ajax({
+            url: 'http://localhost:59138/display.html',
+            method: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            success: function(response) {
+            // Redirect to another HTML file
+                window.location.href = 'display.html';
             }
         });
     });

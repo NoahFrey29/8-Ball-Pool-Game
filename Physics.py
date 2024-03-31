@@ -17,7 +17,7 @@ VEL_EPSILON = phylib.PHYLIB_VEL_EPSILON;
 DRAG = phylib.PHYLIB_DRAG;
 MAX_TIME = phylib.PHYLIB_MAX_TIME;
 MAX_OBJECTS = phylib.PHYLIB_MAX_OBJECTS;
-FRAME_INTERVAL = 0.03;
+FRAME_INTERVAL = 0.02;
 
 HEADER = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
